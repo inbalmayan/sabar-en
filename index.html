@@ -639,10 +639,12 @@ defK('rounds','Active rotations (as of today)',y=>snap(y,()=>live(DB.trainees).f
 defK('instr','Participating instructors',y=>snap(y,()=>cnt(live(DB.instructors).filter(r=>r.active))),y=>drillEnt('Teaching faculty','instructors',()=>live(DB.instructors).filter(r=>r.active),{sub:'Training activity is supported by headquarters, clinical leadership and participating field teams, without a dedicated teaching infrastructure.',cols:['name','group','role','academicSt','traineesCount'],add:{ent:'instructors',def:{active:true}}}));
 defK('affil','Academic affiliations',y=>snap(y,()=>cnt(live(DB.instructors).filter(r=>r.academicSt==='Yes'))),y=>drillEnt('Academic affiliations','instructors',()=>live(DB.instructors).filter(r=>['Yes','In progress','Potential'].includes(r.academicSt)),{sub:'Physicians and nurses with an academic affiliation, or with the potential for one. The main metric counts existing affiliations only.',empty:PEND+' — No academic affiliation entered for faculty yet.',cols:['name','role','academicSt','academicInst']}));
 defK('partners','Partner institutions',y=>snap(y,()=>live(DB.insts).filter(i=>i.status==='Partner'&&instData(i).r>0).length),y=>drillEnt('Research partner institutions','insts',()=>live(DB.insts).filter(i=>i.status==='Partner'&&instData(i).r>0),{sub:'Clicking an institution opens its full partnership page.',cols:INST_COLS(),open:i=>{closeAll();go('inst/'+i.id)},add:{ent:'insts',def:{status:'Partner'}}}));
+/* actual visits by the palliative resident up to 7.10.2026 (real data), 300 NIS per visit */
+const PAL={n:138,per:300};
 const TCATS=[
  {k:'cj',l:'Clalit Jerusalem residents',typ:'Arrive for half a year · on average one and a half patients per month',pm:1.5,f:r=>TKEY[r.type]==='fam'&&r.sendingInst==='Clalit Jerusalem',add:{type:'Family medicine resident',sendingInst:'Clalit Jerusalem',status:'Active'}},
  {k:'famOth',l:'Family medicine residents and other residents',typ:'Maccabi, Meuhedet and other rotations',f:r=>(TKEY[r.type]==='fam'&&r.sendingInst!=='Clalit Jerusalem')||TKEY[r.type]==='oth',add:{type:'Family medicine resident',status:'Active'}},
- {k:'pal',l:'Palliative medicine residents',typ:'On average 15 patients per month · about 4 months',pm:15,f:r=>TKEY[r.type]==='pal',add:{type:'Palliative medicine resident',status:'Active'}}];
+ {k:'pal',l:'Palliative medicine residents',typ:'Home visits actually performed',pm:15,f:r=>TKEY[r.type]==='pal',add:{type:'Palliative medicine resident',status:'Active'}}];
 TCATS.filter(c=>c.k!=='pal').forEach(c=>defK(c.k,c.l,y=>tc(trIn(y).filter(c.f)),y=>drillEnt(`${c.l} ${y}`,'trainees',()=>trIn(y).filter(c.f),{sub:'Rotations, active or completed, that overlap the selected year.',cols:['name','sendingInst','start','end',{l:`Months in ${y}`,r:r=>r1(ovMonths(r,y)),s:r=>ovMonths(r,y)},'status'],empty:'No rotations in this category this year.',add:{ent:'trainees',def:c.add}})));
 const LINK={l:'DOI / PubMed',r:r=>{const out=[];if(r.doi)out.push(h('a',{href:'https://doi.org/'+r.doi,target:'_blank',rel:'noopener',onclick:e=>e.stopPropagation()},h('bdi',{dir:'ltr'},'DOI')));if(r.pmid)out.push(h('a',{href:'https://pubmed.ncbi.nlm.nih.gov/'+r.pmid,target:'_blank',rel:'noopener',onclick:e=>e.stopPropagation()},h('bdi',{dir:'ltr'},'PubMed')));return out.length?out.flatMap((x,i)=>i?[' · ',x]:[x]):h('span',{class:'dash'},'—')}};
 function INST_COLS(){return['name','type',{l:'Studies',r:i=>instData(i).r},{l:'Training / professional contact',r:i=>instData(i).t},'next']}
@@ -875,7 +877,7 @@ function pagePlan(){
  const mo26=c=>r1(trIn(2026).filter(c.f).reduce((a,r)=>a+ovMonths(r,2026),0));
  const cjC=TCATS.find(c=>c.k==='cj'),foC=TCATS.find(c=>c.k==='famOth'),plC=TCATS.find(c=>c.k==='pal');
  const cjM=mo26(cjC),foM=mo26(foC),plM=mo26(plC),plN=trIn(2026).filter(plC.f).length;
- const profPal=Math.round(plM*15*900),profCJ=Math.round(cjM*1.5*900),payFO=Math.round(foM*10*150),payPal=plN*10*150;
+ const profPal=PAL.n*PAL.per,profCJ=Math.round(cjM*1.5*900),payFO=Math.round(foM*10*150),payPal=plN*10*150;
  const shk=n=>'₪'+num(Math.round(n),0);
   const axis=(n,title,goal,...c)=>h('section',{class:'axis a'+n,id:'ax'+n},h('div',{class:'axh'},h('span',{class:'axn'},n),h('div',{},h('h2',{},title),h('p',{class:'axg'},goal))),...c);
  const jump=n=>()=>{const e=document.getElementById('ax'+n);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})};
@@ -913,7 +915,7 @@ function pagePlan(){
     h('p',{style:{margin:'4px 0'}},h('b',{},'Proposed mechanism: '),'The resident joins the nurses for the first two weeks. The profit from their activity, together with the profit from Clalit Jerusalem residents, funds a ₪150 per day payment to the nurses and social workers. The balance is directed to special team training, not as a salary supplement.'),
     h('p',{style:{margin:'4px 0 14px'}},badge('Decision required','b-warn'),' Approval to allocate the profit to team compensation and special training.'),
     dt('Feasibility check (actual 2026 data)',tbl(['Item','Amount'],[
-     [`Profit from the palliative-care resident (${plN} resident${plN===1?"":"s"}, ${num(plM,1)} months × 15 patients × ₪900)`,shk(profPal)],
+     [`Profit from the palliative-care resident (${PAL.n} visits actually performed × ₪${PAL.per})`,shk(profPal)],
      [`Profit from Clalit Jerusalem residents (${num(cjM,1)} training months × 1.5 patients × ₪900)`,shk(profCJ)],
      [h('b',{},'Total profit'),h('b',{},shk(profPal+profCJ))],
      [`Payment of ₪150 per observation day, family medicine and other residents not from Clalit Jerusalem (${num(foM,1)} training months × 10 days)`,shk(payFO)],
@@ -984,9 +986,10 @@ function pageTraining(){
  w.append(h('section',{class:'card'},h('div',{class:'cgrid'},metricBlock('doctors','Residents and rotating physicians · '+Y,Y),metricBlock('months','Training months · '+Y,Y))));
  const card=c=>{
   const fy=y=>{const L=trIn(y).filter(c.f);const mo=r1(L.reduce((a,r)=>a+ovMonths(r,y),0));const pr=c.pm?Math.round(mo*c.pm*900):null;
+   if(c.k==='pal')return h('div',{},h('div',{class:'yr'},h('span',{},y),h('span',{},`${L.length} participant${L.length===1?"":"s"}`)),y===2026&&L.length?h('div',{},h('div',{class:'yr'},h('span',{class:'p'},'Visits actually performed'),h('span',{},PAL.n)),h('div',{class:'yr'},h('span',{class:'p'},'Value'),h('span',{},'₪'+num(PAL.n*PAL.per,0)))):null);
    return h('div',{},h('div',{class:'yr'},h('span',{},y),h('span',{},`${L.length} participant${L.length===1?"":"s"} · ${mo} months`)),pr!==null&&L.length?h('div',{class:'yr'},h('span',{class:'p'},'Estimated profit'),h('span',{},'₪'+num(pr,0))):null)};
   return h('button',{class:'cat',onclick:()=>K[c.k].drill(CUR)},h('h3',{},c.l),h('div',{class:'typ'},c.typ),fy(2025),fy(2026),
-   c.pm?h('div',{class:'note',style:{margin:'8px 0 0',fontSize:'12px'}},`Estimated profit = ${c.pm} patients per month × ₪900 × training months. This is what we would have paid a physician for each patient in place of the resident.`):null)};
+   c.k==='pal'?h('div',{class:'note',style:{margin:'8px 0 0',fontSize:'12px'}},`Value per visit: ₪${PAL.per}, based on visits actually performed up to 07.10.2026.`):c.pm?h('div',{class:'note',style:{margin:'8px 0 0',fontSize:'12px'}},`Estimated profit = ${c.pm} patients per month × ₪900 × training months. This is what we would have paid a physician for each patient in place of the resident.`):null)};
  w.append(h('div',{class:'catg',style:{marginTop:'14px'}},TCATS.map(card)));
  w.append(h('h3',{class:'sech2'},'All rotations'));
  w.append(tableView('trainees',{cols:['name','type','sendingInst','start','end','months','status'],def:{status:'Active'}}));
