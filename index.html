@@ -320,6 +320,7 @@ td input.in{width:100%;min-width:90px;padding:5px 8px}
 .pct{font-weight:800;color:var(--navy)}
 @media(max-width:640px){main{padding:16px}.hd{padding:8px 16px 0}.grid{grid-template-columns:1fr}h1{font-size:26px}.fg{grid-template-columns:1fr}.cols2{grid-template-columns:1fr}.hd img,.hd svg.logo{height:56px}}
 .pin{margin-top:2px}.pin .ch{border-bottom:0;padding-bottom:4px}.pin .ch::after{display:none}.pin h2{font-size:17px}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));column-gap:32px}.fundrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;border:0;border-top:1px dashed var(--line);background:none;padding:8px 0 0;margin-top:10px;font-size:13px;color:var(--muted);text-align:start}.fundrow b{font-size:14px;font-weight:600;color:var(--ink)}.fundrow:hover{color:var(--navy2)}
+.axis{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:16px;border-inline-start:6px solid var(--navy)}.axis.a2{border-inline-start-color:#5848bd}.axis.a3{border-inline-start-color:var(--coral)}.axh{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}.axn{width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex:none}.a2 .axn{background:#5848bd}.a3 .axn{background:var(--coral);color:#fff}.axg{margin:2px 0 0;color:var(--muted)}.axgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.axc{display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:start;background:#fff;border:1px solid var(--line);border-top:4px solid var(--navy);border-radius:12px;padding:14px 16px}.axc.a2{border-top-color:#5848bd}.axc.a3{border-top-color:var(--coral)}.axc:hover{border-color:var(--navy2)}.axt{font-size:18px;color:var(--navy)}
 </style>
 </head>
 <body>
@@ -876,53 +877,64 @@ function pagePlan(){
  const cjM=mo26(cjC),foM=mo26(foC),plM=mo26(plC),plN=trIn(2026).filter(plC.f).length;
  const profPal=Math.round(plM*15*900),profCJ=Math.round(cjM*1.5*900),payFO=Math.round(foM*10*150),payPal=plN*10*150;
  const shk=n=>'₪'+num(Math.round(n),0);
+  const axis=(n,title,goal,...c)=>h('section',{class:'axis a'+n,id:'ax'+n},h('div',{class:'axh'},h('span',{class:'axn'},n),h('div',{},h('h2',{},title),h('p',{class:'axg'},goal))),...c);
+ const jump=n=>()=>{const e=document.getElementById('ax'+n);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})};
+ const ovc=(n,title,line,tag,tagCls)=>h('button',{class:'axc a'+n,onclick:jump(n)},h('span',{class:'ms'},'Axis '+n),h('b',{class:'axt'},title),h('span',{class:'ms'},line),badge(tag,tagCls));
+ const G1='Turn existing studies into publications: a research and grants coordinator and a research fund',G2='Expand training without overloading the teams, with compensation funded from the residents’ activity profit',G3='Institutional collaboration with Reichman University and a personal academic appointment';
  w.append(h('div',{class:'pgh'},h('div',{},h('h1',{},'2027 Work Plan'),h('p',{class:'lead'},'Research, clinical training and academic development'))));
  w.append(h('p',{class:'plead'},'Establishing Sabar Medicine’s standing as a leading medical organization that generates scientific knowledge on home care, trains professionals and develops collaborations with academic institutions.'));
- // Reichman: relevant to both research and training
- w.append(h('section',{class:'card',style:{marginTop:'16px'}},
-  h('div',{class:'ch'},h('h2',{},'Opportunity for academic collaboration with Reichman University')),
+ w.append(h('h2',{class:'sech'},'The plan’s three axes'));
+ w.append(h('div',{class:'axgrid'},ovc(1,'Research & Publications',G1,'Investment request: ₪150,000','b-goal'),ovc(2,'Clinical training',G2,'Decision required','b-warn'),ovc(3,'Academic development',G3,'Not yet agreed','b-opp')));
+ // ===== Axis 1: research =====
+ w.append(axis(1,'Research & Publications',G1,
+  h('div',{class:'cols2 top'},
+   h('div',{},
+    h('h3',{class:'sech2',style:{marginTop:0}},'Scenario comparison'),
+    tbl(['Metric','Without additional budget','With budget'],[['Scientific publications','4','7–8'],['Research grant applications','0–1','3'],['Studies to be advanced with dedicated funding','Depending on resources','At least 2']]),
+    h('h3',{class:'sech2'},'Requested budget'),
+    tbl(['Component','Annual budget'],[['Research and grants coordinator, 50% position','₪100,000'],['Research fund for analyses and professional expenses','₪50,000'],[h('b',{},'Total'),h('b',{},'₪150,000')]],{lastBold:true,num:true}),
+    h('div',{class:'note'},'The amounts are planning estimates for 2027.')),
+   h('div',{},
+    dt('Role of the research and grants coordinator',ul(['Managing and tracking the progress of studies in the organization, from proposal to publication.','Coordination with researchers, partners and research institutions.','Assistance with ethics approval processes and document submission.','Identifying research grant opportunities.','Checking eligibility criteria and calls for proposals.','Compiling documents, budgets and timelines for grant submissions.','Supporting the submission process and follow-up.']),h('p',{class:'ms'},'The coordinator is not responsible for the scientific writing or for conducting the research in place of the researchers. The main barrier to research activity is also the researchers’ time, so the entire expected increase in publications should not be attributed to hiring the coordinator.')),
+    dt('The research fund',h('p',{},'The fund will be used for targeted funding of actions required to advance existing studies, such as:'),ul(['statistical analyses.','data processing.','professional expenses required to advance research and publication.']),h('p',{class:'ms'},'The fund will make it possible to advance studies that are currently delayed by the lack of limited, targeted funding.')),
+    dt('Expected value of the investment',ul(['Stabilizing the flow of future studies, from proposal to publication.','Accelerating existing studies.','Reducing operational and funding barriers.','Building a systematic process for identifying and submitting research grants.','Reducing dependence on personal management of every stage of the research.','Strengthening the organizational research infrastructure over time.']))))));
+ // ===== Axis 2: clinical training =====
+ w.append(axis(2,'Clinical training',G2,
+  h('div',{class:'cols2 top'},
+   h('div',{},
+    h('h3',{class:'sech2',style:{marginTop:0}},'Family medicine residents'),
+    ul(['Continuing and deepening the collaboration with Clalit Jerusalem.','Expanding the intake of residents from the other health funds.','Maintaining a training volume of at least 11 residents per year.','Possibility of expanding the number of residents according to supervision capacity.']),
+    h('div',{class:'callout'},h('b',{},'Main barrier: '),'The workload on the nursing and social work teams participating in supervision limits the ability to expand training activity. ',h('b',{},'Proposed response: '),'A payment of ₪150 per observation day to the instructing nurses and social workers, about 10 observation days per month per resident. The payment is funded from the profit of the palliative-care resident (expected: one per year) and of the Clalit Jerusalem residents (expected: six per year).'),
+    h('p',{style:{margin:'0 0 8px'}},badge('Decision required','b-warn'),' The remaining profit at year-end, beyond the ₪150 per day payment, will be allocated to special team training, such as sending an outstanding nurse, physician or social worker to a conference.'),
+    h('p',{class:'ms',style:{margin:'0 0 8px'}},h('b',{},'Existing management time, not budgeted: '),'Yehoram Zinger, hospice director, and Glanis Katz, quality and control manager, who accompanies the rotating physicians and helps them throughout the day.')),
+   h('div',{},
+    h('h3',{class:'sech2',style:{marginTop:0}},'Palliative medicine residents'),
+    h('p',{style:{margin:'4px 0'}},h('b',{},'Goal: '),'Continuing the clinical residency activity at Sabar and professional development of the teams accompanying the residents.'),
+    h('p',{style:{margin:'4px 0'}},h('b',{},'Proposed mechanism: '),'The resident joins the nurses for the first two weeks. The profit from their activity, together with the profit from Clalit Jerusalem residents, funds a ₪150 per day payment to the nurses and social workers. The balance is directed to special team training, not as a salary supplement.'),
+    h('p',{style:{margin:'4px 0 14px'}},badge('Decision required','b-warn'),' Approval to allocate the profit to team compensation and special training.'),
+    dt('Feasibility check (actual 2026 data)',tbl(['Item','Amount'],[
+     [`Profit from the palliative-care resident (${plN} resident${plN===1?"":"s"}, ${num(plM,1)} months × 15 patients × ₪900)`,shk(profPal)],
+     [`Profit from Clalit Jerusalem residents (${num(cjM,1)} training months × 1.5 patients × ₪900)`,shk(profCJ)],
+     [h('b',{},'Total profit'),h('b',{},shk(profPal+profCJ))],
+     [`Payment of ₪150 per observation day, family medicine and other residents not from Clalit Jerusalem (${num(foM,1)} training months × 10 days)`,shk(payFO)],
+     [`Palliative-care resident observation with the nurses in the first two weeks (${plN} × about 10 days)`,shk(payPal)],
+     [h('b',{},'Balance for special team training'),h('b',{},shk(profPal+profCJ-payFO-payPal))]],{num:true}),
+     h('p',{class:'ms'},'Calculated from actual 2026 data (to date). The payment covers only residents who are not from Clalit Jerusalem and not in palliative care, at about 10 observation days per month.'))))));
+ // ===== Axis 3: academic development =====
+ w.append(axis(3,'Academic development',G3,
   h('p',{style:{marginTop:0}},'A channel has been opened to advance collaboration between Sabar Medicine and the School of Medicine at Reichman University. The collaboration may include hosting medical students for clinical experience at Sabar, the possibility of academic appointments for physicians who wish to advance academically through teaching and research, and access to academic research infrastructure, subject to agreements between the institutions.'),
-  h('div',{class:'cols2'},
-   h('div',{class:'sub'},h('h3',{},'A. Institutional collaboration '),h('p',{},'The contact has been passed on for business review. I will present the details of the proposal from the faculty dean, Prof. Arnon Afek, orally.'),badge('Not yet agreed','b-opp')),
-   h('div',{class:'sub'},h('h3',{},'B. Personal academic appointment '),h('p',{},'In parallel, I intend to apply for an appointment as senior lecturer at Reichman University. No teaching obligation is expected in the coming academic year, and from the following year participation in teaching is planned at the scope of several lectures per year.'),
+  h('div',{class:'cols2 top'},
+   h('div',{class:'sub'},h('h3',{},'A. Institutional collaboration'),h('p',{},'The contact has been passed on for business review. I will present the details of the proposal from the faculty dean, Prof. Arnon Afek, orally.'),badge('Not yet agreed','b-opp'),
+    h('p',{style:{margin:'12px 0 4px'}},h('b',{},'Medical students: '),'Examining hosting medical students for short clinical experiences at Sabar, as part of a possible collaboration with Reichman University.'),
+    h('p',{style:{margin:'4px 0 0'}},badge('A possibility not yet agreed','b-opp'),' Subject to an institutional agreement, management approval and preparation for hosting students in the 2027-2028 academic year.')),
+   h('div',{class:'sub'},h('h3',{},'B. Personal academic appointment'),h('p',{},'In parallel, I intend to apply for an appointment as senior lecturer at Reichman University. No teaching obligation is expected in the coming academic year, and from the following year participation in teaching is planned at the scope of several lectures per year.'),
     h('p',{style:{marginBottom:'4px'}},h('b',{},'With the appointment’s approval (a process of about half a year), it will allow:')),ul(['Submitting studies to the university’s institutional ethics committee on behalf of Sabar Medicine, without the need for an external researcher.','Use of academic library services.','Access to additional academic resources, such as medical software (for example UpToDate) for which we currently pay licenses.']),badge('Not yet submitted','b-opp'))),
   h('div',{class:'ms',style:{marginTop:'8px'}},'No budget request at this stage.')));
- // Research | Training side by side
- w.append(h('div',{class:'cols2 top',style:{marginTop:'16px'}},
-  h('section',{class:'card'},h('div',{class:'ch'},h('h2',{},'Research & Publications')),
-   h('h3',{class:'sech2',style:{marginTop:0}},'Scenario comparison'),
-   tbl(['Metric','Without additional budget','With budget'],[['Scientific publications','4','7–8'],['Research grant applications','0–1','3'],['Studies to be advanced with dedicated funding','Depending on resources','At least 2']]),
-   h('h3',{class:'sech2'},'Requested budget'),
-   tbl(['Component','Annual budget'],[['Research and grants coordinator, 50% position','₪100,000'],['Research fund for analyses and professional expenses','₪50,000'],[h('b',{},'Total'),h('b',{},'₪150,000')]],{lastBold:true,num:true}),
-   h('div',{class:'note'},'The amounts are planning estimates for 2027.'),
-   dt('Role of the research and grants coordinator',ul(['Managing and tracking the progress of studies in the organization, from proposal to publication.','Coordination with researchers, partners and research institutions.','Assistance with ethics approval processes and document submission.','Identifying research grant opportunities.','Checking eligibility criteria and calls for proposals.','Compiling documents, budgets and timelines for grant submissions.','Supporting the submission process and follow-up.']),h('p',{class:'ms'},'The coordinator is not responsible for the scientific writing or for conducting the research in place of the researchers. The main barrier to research activity is also the researchers’ time, so the entire expected increase in publications should not be attributed to hiring the coordinator.')),
-   dt('The research fund',h('p',{},'The fund will be used for targeted funding of actions required to advance existing studies, such as:'),ul(['statistical analyses.','data processing.','professional expenses required to advance research and publication.']),h('p',{class:'ms'},'The fund will make it possible to advance studies that are currently delayed by the lack of limited, targeted funding.')),
-   dt('Expected value of the investment',ul(['Stabilizing the flow of future studies, from proposal to publication.','Accelerating existing studies.','Reducing operational and funding barriers.','Building a systematic process for identifying and submitting research grants.','Reducing dependence on personal management of every stage of the research.','Strengthening the organizational research infrastructure over time.']))),
-  h('section',{class:'card'},h('div',{class:'ch'},h('h2',{},'Clinical training')),
-   h('h3',{class:'sech2',style:{marginTop:0}},'Family medicine residents'),
-   ul(['Continuing and deepening the collaboration with Clalit Jerusalem.','Expanding the intake of residents from the other health funds.','Maintaining a training volume of at least 11 residents per year.','Possibility of expanding the number of residents according to supervision capacity.']),
-   h('div',{class:'callout'},h('b',{},'Main barrier: '),'The workload on the nursing and social work teams participating in supervision limits the ability to expand training activity. ',h('b',{},'Proposed response: '),'A payment of ₪150 per observation day to the instructing nurses and social workers, about 10 observation days per month per resident. The payment is funded from the profit of the palliative-care resident (expected: one per year) and of the Clalit Jerusalem residents (expected: six per year).'),
-   h('p',{style:{margin:'0 0 8px'}},badge('Decision required','b-warn'),' The remaining profit at year-end, beyond the ₪150 per day payment, will be allocated to special team training, such as sending an outstanding nurse, physician or social worker to a conference.'),
-   h('p',{class:'ms',style:{margin:'0 0 8px'}},h('b',{},'Existing management time, not budgeted: '),'Yehoram Zinger, hospice director, and Glanis Katz, quality and control manager, who accompanies the rotating physicians and helps them throughout the day.'),
-   dt('Feasibility check (actual 2026 data)',tbl(['Item','Amount'],[
-    [`Profit from the palliative-care resident (${plN} resident${plN===1?"":"s"}, ${num(plM,1)} months × 15 patients × ₪900)`,shk(profPal)],
-    [`Profit from Clalit Jerusalem residents (${num(cjM,1)} training months × 1.5 patients × ₪900)`,shk(profCJ)],
-    [h('b',{},'Total profit'),h('b',{},shk(profPal+profCJ))],
-    [`Payment of ₪150 per observation day, family medicine and other residents not from Clalit Jerusalem (${num(foM,1)} training months × 10 days)`,shk(payFO)],
-    [`Palliative-care resident observation with the nurses in the first two weeks (${plN} × about 10 days)`,shk(payPal)],
-    [h('b',{},'Balance for special team training'),h('b',{},shk(profPal+profCJ-payFO-payPal))]],{num:true}),
-   h('p',{class:'ms'},'Calculated from actual 2026 data (to date). The payment covers only residents who are not from Clalit Jerusalem and not in palliative care, at about 10 observation days per month.')),
-   h('h3',{class:'sech2'},'Palliative medicine residents'),
-   h('p',{style:{margin:'4px 0'}},h('b',{},'Goal: '),'Continuing the clinical residency activity at Sabar and professional development of the teams accompanying the residents.'),
-   h('p',{style:{margin:'4px 0'}},h('b',{},'Proposed mechanism: '),'The resident joins the nurses for the first two weeks. The profit from their activity, together with the profit from Clalit Jerusalem residents, funds a ₪150 per day payment to the nurses and social workers. The balance is directed to special team training, not as a salary supplement.'),
-   h('p',{style:{margin:'4px 0 14px'}},badge('Decision required','b-warn'),' Approval to allocate the profit to team compensation and special training.'),
-   h('h3',{class:'sech2'},'Medical students'),
-   h('p',{style:{margin:'4px 0'}},h('b',{},'Opportunity: '),'Examining hosting medical students for short clinical experiences at Sabar, as part of a possible collaboration with Reichman University.'),
-   h('p',{style:{margin:'4px 0 0'}},badge('A possibility not yet agreed','b-opp'),' Subject to an institutional agreement, management approval and preparation for hosting students in the 2027-2028 academic year.'))));
- // Decisions | Budget summary side by side
- w.append(h('div',{class:'cols2 top',style:{marginTop:'16px'}},
+ // ===== decisions & budget =====
+ w.append(h('h2',{class:'sech'},'Decisions & budget'));
+ w.append(h('div',{class:'cols2 top',style:{marginTop:'8px'}},
   h('section',{class:'card'},h('div',{class:'ch'},h('h2',{},'Management decisions required')),
-   tbl(['Field','Decision required'],[['Research','Approval of an annual investment of ₪150,000'],['Training family medicine residents','Approval of a ₪150 per observation day payment to nurses and social workers, funded from the residents’ activity profit'],['Reichman University','Examining institutional collaboration'],['Palliative medicine residency','Approval to transfer the annual profit balance to special team training (such as conference travel)']].map(r=>[h('b',{},r[0]),r[1]]))),
+   tbl(['Axis','Decision required'],[['1 · Research','Approval of an annual investment of ₪150,000'],['2 · Training family medicine residents','Approval of a ₪150 per observation day payment to nurses and social workers, funded from the residents’ activity profit'],['2 · Palliative medicine residency','Approval to transfer the annual profit balance to special team training (such as conference travel)'],['3 · Reichman University','Examining institutional collaboration']].map(r=>[h('b',{},r[0]),r[1]]))),
   h('section',{class:'card'},h('div',{class:'ch'},h('h2',{},'Budget summary')),
    h('div',{class:'ht-h'},h('span',{},'Defined new budget for 2027')),h('div',{class:'kval',style:{fontSize:'40px'}},'₪150,000'),
    ul(['₪100,000 For a half-time research and grants coordinator.','₪50,000 For a research fund.']),
