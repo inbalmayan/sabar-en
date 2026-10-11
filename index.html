@@ -830,7 +830,7 @@ function trainingCard(Y){
  const legend=h('div',{class:'dl'},items.map(it=>h('button',{class:'dli','data-k':it.k,onclick:()=>K[it.k].drill(Y),onmouseenter:()=>it.val&&ring.api.focus(it),onmouseleave:()=>ring.api.reset()},h('i',{class:'sw',style:{background:it.color}}),h('span',{},it.label),h('b',{},K[it.k].val(Y)==null?'—':K[it.k].val(Y)))));
  return h('section',{class:'card'},h('div',{class:'ch'},h('h2',{},'Clinical training'),h('button',{class:'more',onclick:()=>go('training')},'Details →')),
   h('div',{class:'cgrid'},
-   h('div',{},metricBlock('doctors','Residents and rotating physicians',Y),h('div',{class:'dvd'}),metricBlock('months','Training months',Y)),
+   h('div',{},metricBlock('doctors','Residents and rotating physicians · '+Y,Y),h('div',{class:'dvd'}),metricBlock('months','Training months · '+Y,Y)),
    h('div',{class:'donutw',style:{flexDirection:'column',alignItems:'stretch'}},ring.box,legend)),
   h('button',{class:'prow',style:{marginTop:'12px',borderTop:'1px solid var(--line)'},onclick:()=>K.instr.drill(CUR)},h('span',{class:'pn'},'Participating instructors'),h('b',{style:{color:'var(--navy)',fontSize:'18px'}},fv(K.instr.val(CUR),true))))}
 const INST_ORDER=['The Hebrew University','Tel Aviv University','Ben-Gurion University','University of Haifa','Ariel University'];
@@ -880,11 +880,11 @@ function pagePlan(){
  w.append(h('p',{class:'plead'},'Establishing Sabar Medicine’s standing as a leading medical organization that generates scientific knowledge on home care, trains professionals and develops collaborations with academic institutions.'));
  // Reichman: relevant to both research and training
  w.append(h('section',{class:'card',style:{marginTop:'16px'}},
-  h('div',{class:'ch'},h('h2',{},'Opportunity for academic collaboration with Reichman University'),h('span',{class:'pills'},pill('Research'),pill('Training'))),
+  h('div',{class:'ch'},h('h2',{},'Opportunity for academic collaboration with Reichman University')),
   h('p',{style:{marginTop:0}},'A channel has been opened to advance collaboration between Sabar Medicine and the School of Medicine at Reichman University. The collaboration may include hosting medical students for clinical experience at Sabar, the possibility of academic appointments for physicians who wish to advance academically through teaching and research, and access to academic research infrastructure, subject to agreements between the institutions.'),
   h('div',{class:'cols2'},
-   h('div',{class:'sub'},h('h3',{},'A. Institutional collaboration ',h('span',{class:'pills'},pill('Training'),pill('Research'))),h('p',{},'The contact has been passed on for business review. I will present the details of the proposal from the faculty dean, Prof. Arnon Afek, orally.'),badge('Not yet agreed','b-opp')),
-   h('div',{class:'sub'},h('h3',{},'B. Personal academic appointment ',h('span',{class:'pills'},pill('Research'),pill('Teaching'))),h('p',{},'In parallel, I intend to apply for an appointment as senior lecturer at Reichman University. No teaching obligation is expected in the coming academic year, and from the following year participation in teaching is planned at the scope of several lectures per year.'),
+   h('div',{class:'sub'},h('h3',{},'A. Institutional collaboration '),h('p',{},'The contact has been passed on for business review. I will present the details of the proposal from the faculty dean, Prof. Arnon Afek, orally.'),badge('Not yet agreed','b-opp')),
+   h('div',{class:'sub'},h('h3',{},'B. Personal academic appointment '),h('p',{},'In parallel, I intend to apply for an appointment as senior lecturer at Reichman University. No teaching obligation is expected in the coming academic year, and from the following year participation in teaching is planned at the scope of several lectures per year.'),
     h('p',{style:{marginBottom:'4px'}},h('b',{},'If the appointment is approved, it will allow:')),ul(['Submitting studies to the university’s institutional ethics committee on behalf of Sabar Medicine, without the need for an external researcher.','Use of academic library services.','Access to additional academic resources, such as medical software (for example UpToDate) for which we currently pay licenses.']),badge('Not yet submitted','b-opp'))),
   h('div',{class:'ms',style:{marginTop:'8px'}},'No budget request at this stage.')));
  // Research | Training side by side
@@ -956,7 +956,7 @@ function pagePipeline(){
   tableView('studies',{cols:['name','field',leadCol,'partners','stage',{l:'Sub-status',r:subStatus,s:subStatus},'fundSt','blocker'],recs:()=>DB.studies.filter(x=>x.stage!=='Published'&&(!ui.stage||x.stage===ui.stage)&&(!ui.dept||deptOf(x)===ui.dept)),def:{...(ui.stage?{stage:ui.stage}:{}),...(ui.dept&&ui.dept!=='Not assigned'?{field:ui.dept}:{})}})));
  w.append(h('h2',{class:'sech'},'Publications & funding'));
  const alt=y=>{const f=fundedPubs(y)[0];if(!f)return null;const g=live(DB.grants).find(g=>g.status==='Accepted'&&g.outputPub===f.id);return g?shortMoney(g.amount,g.cur)+' → Publication':null};
- w.append(h('section',{class:'card'},h('div',{class:'cgrid'},metricBlock('pubs','Publications',CUR),metricBlock('funding','External funding',CUR,alt))));
+ w.append(h('section',{class:'card'},h('div',{class:'cgrid'},h('div',{},metricBlock('pubs','Publications · Total',CUR,null,{total:true,drill:allPubsDrill}),fundRow(CUR,alt)))));
  w.append(h('h3',{class:'sech2'},'List of publications'));
  w.append(tableView('pubs',{cols:['title','journal','pubYear','status','authors','field','partners',LINK],def:{status:'Published',pubYear:CUR}}));
  w.append(h('h3',{class:'sech2'},'Grants'));
@@ -969,7 +969,7 @@ function pageTraining(){
  const w=h('div');const Y=CUR;
  w.append(h('div',{class:'pgh'},h('div',{},h('h1',{style:{fontSize:'28px'}},'Clinical Training & Teaching'))));
  w.append(h('h2',{class:'sech'},'Residents and rotating physicians'));
- w.append(h('section',{class:'card'},h('div',{class:'cgrid'},metricBlock('doctors','Residents and rotating physicians',Y),metricBlock('months','Training months',Y))));
+ w.append(h('section',{class:'card'},h('div',{class:'cgrid'},metricBlock('doctors','Residents and rotating physicians · '+Y,Y),metricBlock('months','Training months · '+Y,Y))));
  const card=c=>{
   const fy=y=>{const L=trIn(y).filter(c.f);const mo=r1(L.reduce((a,r)=>a+ovMonths(r,y),0));const pr=c.pm?Math.round(mo*c.pm*900):null;
    return h('div',{},h('div',{class:'yr'},h('span',{},y),h('span',{},`${L.length} participant${L.length===1?"":"s"} · ${mo} months`)),pr!==null&&L.length?h('div',{class:'yr'},h('span',{class:'p'},'Estimated profit'),h('span',{},'₪'+num(pr,0))):null)};
