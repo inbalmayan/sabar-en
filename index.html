@@ -642,9 +642,9 @@ defK('partners','Partner institutions',y=>snap(y,()=>live(DB.insts).filter(i=>i.
 /* actual visits by the palliative resident up to 7.10.2026 (real data), 300 NIS per visit */
 const PAL={n:138,per:300};
 const TCATS=[
- {k:'cj',l:'Clalit Jerusalem residents',typ:'Arrive for half a year · on average one and a half patients per month',pm:1.5,f:r=>TKEY[r.type]==='fam'&&r.sendingInst==='Clalit Jerusalem',add:{type:'Family medicine resident',sendingInst:'Clalit Jerusalem',status:'Active'}},
+ {k:'cj',l:'Clalit Jerusalem residents',typ:'Arrive for half a year',pm:1.5,f:r=>TKEY[r.type]==='fam'&&r.sendingInst==='Clalit Jerusalem',add:{type:'Family medicine resident',sendingInst:'Clalit Jerusalem',status:'Active'}},
  {k:'famOth',l:'Family medicine residents and other residents',typ:'Maccabi, Meuhedet and other rotations',f:r=>(TKEY[r.type]==='fam'&&r.sendingInst!=='Clalit Jerusalem')||TKEY[r.type]==='oth',add:{type:'Family medicine resident',status:'Active'}},
- {k:'pal',l:'Palliative medicine residents',typ:'Home visits actually performed',pm:15,f:r=>TKEY[r.type]==='pal',add:{type:'Palliative medicine resident',status:'Active'}}];
+ {k:'pal',l:'Palliative medicine residents',typ:'On average about 4 months',pm:15,f:r=>TKEY[r.type]==='pal',add:{type:'Palliative medicine resident',status:'Active'}}];
 TCATS.filter(c=>c.k!=='pal').forEach(c=>defK(c.k,c.l,y=>tc(trIn(y).filter(c.f)),y=>drillEnt(`${c.l} ${y}`,'trainees',()=>trIn(y).filter(c.f),{sub:'Rotations, active or completed, that overlap the selected year.',cols:['name','sendingInst','start','end',{l:`Months in ${y}`,r:r=>r1(ovMonths(r,y)),s:r=>ovMonths(r,y)},'status'],empty:'No rotations in this category this year.',add:{ent:'trainees',def:c.add}})));
 const LINK={l:'DOI / PubMed',r:r=>{const out=[];if(r.doi)out.push(h('a',{href:'https://doi.org/'+r.doi,target:'_blank',rel:'noopener',onclick:e=>e.stopPropagation()},h('bdi',{dir:'ltr'},'DOI')));if(r.pmid)out.push(h('a',{href:'https://pubmed.ncbi.nlm.nih.gov/'+r.pmid,target:'_blank',rel:'noopener',onclick:e=>e.stopPropagation()},h('bdi',{dir:'ltr'},'PubMed')));return out.length?out.flatMap((x,i)=>i?[' · ',x]:[x]):h('span',{class:'dash'},'—')}};
 function INST_COLS(){return['name','type',{l:'Studies',r:i=>instData(i).r},{l:'Training / professional contact',r:i=>instData(i).t},'next']}
@@ -908,7 +908,8 @@ function pagePlan(){
     ul(['Continuing and deepening the collaboration with Clalit Jerusalem.','Expanding the intake of residents from the other health funds.','Maintaining a training volume of at least 11 residents per year.','Possibility of expanding the number of residents according to supervision capacity.']),
     h('div',{class:'callout'},h('b',{},'Main barrier: '),'The workload on the nursing and social work teams participating in supervision limits the ability to expand training activity. ',h('b',{},'Proposed response: '),'A payment of ₪150 per observation day to the instructing nurses and social workers, about 10 observation days per month per resident. The payment is funded from the profit of the palliative-care resident (expected: one per year) and of the Clalit Jerusalem residents (expected: six per year).'),
     h('p',{style:{margin:'0 0 8px'}},badge('Decision required','b-warn'),' The remaining profit at year-end, beyond the ₪150 per day payment, will be allocated to special team training, such as sending an outstanding nurse, physician or social worker to a conference.'),
-    h('p',{class:'ms',style:{margin:'0 0 8px'}},h('b',{},'Existing management time, not budgeted: '),'Yehoram Zinger, hospice director, and Glanis Katz, quality and control manager, who accompanies the rotating physicians and helps them throughout the day.')),
+    h('p',{class:'ms',style:{margin:'0 0 8px'}},h('b',{},'Existing management time: '),'Yehoram Zinger, hospice director, and Glanis Katz, quality and control manager, who accompanies the rotating physicians and helps them throughout the day.'),
+    h('p',{class:'ms',style:{margin:'0 0 8px'}},h('b',{},'Existing mechanism: '),'The organization sending nurses for training pays ₪120 per training day, of which ₪80 goes to the instructing nurses.')),
    h('div',{},
     h('h3',{class:'sech2',style:{marginTop:0}},'Palliative medicine residents'),
     h('p',{style:{margin:'4px 0'}},h('b',{},'Goal: '),'Continuing the clinical residency activity at Sabar and professional development of the teams accompanying the residents.'),
@@ -985,16 +986,14 @@ function pageTraining(){
  w.append(h('h2',{class:'sech'},'Residents and rotating physicians'));
  w.append(h('section',{class:'card'},h('div',{class:'cgrid'},metricBlock('doctors','Residents and rotating physicians · '+Y,Y),metricBlock('months','Training months · '+Y,Y))));
  const card=c=>{
-  const fy=y=>{const L=trIn(y).filter(c.f);const mo=r1(L.reduce((a,r)=>a+ovMonths(r,y),0));const pr=c.pm?Math.round(mo*c.pm*900):null;
-   if(c.k==='pal')return h('div',{},h('div',{class:'yr'},h('span',{},y),h('span',{},`${L.length} participant${L.length===1?"":"s"}`)),y===2026&&L.length?h('div',{},h('div',{class:'yr'},h('span',{class:'p'},'Visits actually performed'),h('span',{},PAL.n)),h('div',{class:'yr'},h('span',{class:'p'},'Value'),h('span',{},'₪'+num(PAL.n*PAL.per,0)))):null);
-   return h('div',{},h('div',{class:'yr'},h('span',{},y),h('span',{},`${L.length} participant${L.length===1?"":"s"} · ${mo} months`)),pr!==null&&L.length?h('div',{class:'yr'},h('span',{class:'p'},'Estimated profit'),h('span',{},'₪'+num(pr,0))):null)};
-  return h('button',{class:'cat',onclick:()=>K[c.k].drill(CUR)},h('h3',{},c.l),h('div',{class:'typ'},c.typ),fy(2025),fy(2026),
-   c.k==='pal'?h('div',{class:'note',style:{margin:'8px 0 0',fontSize:'12px'}},`Value per visit: ₪${PAL.per}, based on visits actually performed up to 07.10.2026.`):c.pm?h('div',{class:'note',style:{margin:'8px 0 0',fontSize:'12px'}},`Estimated profit = ${c.pm} patients per month × ₪900 × training months. This is what we would have paid a physician for each patient in place of the resident.`):null)};
+  const fy=y=>{const L=trIn(y).filter(c.f);const mo=r1(L.reduce((a,r)=>a+ovMonths(r,y),0));
+   return h('div',{},h('div',{class:'yr'},h('span',{},y),h('span',{},`${L.length} participant${L.length===1?"":"s"} · ${mo} months`)))};
+  return h('button',{class:'cat',onclick:()=>K[c.k].drill(CUR)},h('h3',{},c.l),h('div',{class:'typ'},c.typ),fy(2025),fy(2026))};
  w.append(h('div',{class:'catg',style:{marginTop:'14px'}},TCATS.map(card)));
  w.append(h('h3',{class:'sech2'},'All rotations'));
  w.append(tableView('trainees',{cols:['name','type','sendingInst','start','end','months','status'],def:{status:'Active'}}));
  w.append(h('h2',{class:'sech'},'Specialist nurses in training'));
- w.append(h('section',{class:'card',style:{marginBottom:'12px'}},h('p',{style:{margin:0}},'Specialist nurses come to train with us, under the guidance of Sabar nurses. The sending organization pays ₪120 per training day, of which ₪80 goes to the instructing nurses. This is an existing mechanism.')));
+ w.append(h('section',{class:'card',style:{marginBottom:'12px'}},h('p',{style:{margin:0}},'Specialist nurses come to train with us, under the guidance of Sabar nurses.')));
  w.append(tableView('nurses',{cols:['name','field','notes'],def:{}}));
  w.append(h('h2',{class:'sech'},'Teaching faculty'));
  w.append(h('div',{class:'note'},'Training activity is supported by participating instructors, without a dedicated teaching infrastructure.'));
