@@ -319,6 +319,7 @@ footer{max-width:1280px;margin:0 auto;padding:0 24px 40px}
 td input.in{width:100%;min-width:90px;padding:5px 8px}
 .pct{font-weight:800;color:var(--navy)}
 @media(max-width:640px){main{padding:16px}.hd{padding:8px 16px 0}.grid{grid-template-columns:1fr}h1{font-size:26px}.fg{grid-template-columns:1fr}.cols2{grid-template-columns:1fr}.hd img,.hd svg.logo{height:56px}}
+.pin{margin-top:2px}.pin .ch{border-bottom:0;padding-bottom:4px}.pin .ch::after{display:none}.pin h2{font-size:17px}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));column-gap:32px}.fundrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;border:0;border-top:1px dashed var(--line);background:none;padding:8px 0 0;margin-top:10px;font-size:13px;color:var(--muted);text-align:start}.fundrow b{font-size:14px;font-weight:600;color:var(--ink)}.fundrow:hover{color:var(--navy2)}
 </style>
 </head>
 <body>
@@ -768,19 +769,19 @@ const pickStageDrill=st=>drillEnt(`Stage: ${st}`,'studies',()=>stageStudies(st),
 /* ============ pages ============ */
 function pageHome(){
  const Y=CUR;const wrap=h('div');
- wrap.append(h('div',{class:'hero'},h('div',{},h('h1',{},'Professional & Academic Infrastructure'),h('p',{class:'lead'},'Research | Clinical training | Partnerships'))));
+ wrap.append(h('div',{class:'hero'},h('div',{},h('h1',{},'Professional & Academic Infrastructure'),h('p',{class:'lead'},'Research & partnerships | Clinical training'))));
  wrap.append(researchCard(Y));
- wrap.append(h('div',{class:'grid2'},trainingCard(Y),partnersCard()));
+ wrap.append(trainingCard(Y));
  return wrap}
-function metricBlock(key,label,Y,alt){
+function metricBlock(key,label,Y,alt,opt){
  const ys=key==='pubs'?[2024,2025,2026]:[2025,2026];const vals=ys.map(y=>K[key].val(y));
  const max=Math.max(1,...vals.map(v=>typeof v==='number'?v:0));
- const cur=K[key].val(Y);const a=alt&&alt(Y);
+ const tot=!!(opt&&opt.total);const cur=tot?vals.reduce((s,v)=>s+(typeof v==='number'?v:0),0):K[key].val(Y);const a=alt&&alt(Y);
  return h('div',{class:'mb'},
   h('div',{class:'ht-h'},h('span',{},label)),
-  h('button',{class:'big'+((cur==null&&!a)?' pend':'')+(typeof cur==='string'||a?' txt':''),onclick:()=>K[key].drill(Y),title:'What is behind the number?'},a||fv(cur)),
+  h('button',{class:'big'+((cur==null&&!a)?' pend':'')+(typeof cur==='string'||a?' txt':''),onclick:()=>tot?opt.drill():K[key].drill(Y),title:'What is behind the number?'},a||fv(cur)),
   h('div',{class:'brs'},ys.map((y,i)=>{const v=vals[i],al=alt&&alt(y);
-   return h('button',{class:'br'+(y===Y?' cur':''),'data-tip':y+': '+(al||(v==null?PEND:typeof v==='number'?num(v):v)),onclick:()=>K[key].drill(y)},h('span',{class:'by'},y),
+   return h('button',{class:'br'+(y===Y&&!tot?' cur':''),'data-tip':y+': '+(al||(v==null?PEND:typeof v==='number'?num(v):v)),onclick:()=>K[key].drill(y)},h('span',{class:'by'},y),
     h('span',{class:'trk'+(typeof v==='number'?'':' none')},typeof v==='number'?h('i',{style:{width:Math.max(v/max*100,v?4:0)+'%'}}):null),
     h('span',{class:'bv'},al||(v==null?'pending':typeof v==='number'?num(v):v)))})))}
 const durOf=st=>{const v=(DB.stageDur||{})[st];return v===undefined||v===''||v===null?null:+v};
@@ -789,17 +790,20 @@ function maturityBar(){
  const tot=parts.reduce((a,x)=>a+x.n,0);
  return h('div',{class:'mat'},h('div',{class:'ms'},`Average maturation time, from research proposal to publication: ≈${num(tot)} months`),
   h('div',{class:'matbar'},parts.map(x=>h('span',{class:'ph'+x.i,style:{flex:x.n},'data-tip':`${x.st}: ≈${num(x.n)} months`},num(x.n)))))}
+const allPubsDrill=()=>drillEnt('Publications · Total','pubs',()=>live(DB.pubs).filter(p=>p.status==='Published'),{sub:'Scientific publications based on Sabar research or on a collaboration in which Sabar had significant scientific involvement.',cols:['title','journal','authors','field','partners',LINK]});
+const fundRow=(Y,alt)=>{const a=alt&&alt(Y);return h('button',{class:'fundrow',onclick:()=>K.funding.drill(Y)},h('span',{},'External funding '+Y),h('b',{},a||fv(K.funding.val(Y))))};
 function researchCard(Y){
  const alt=y=>{const f=fundedPubs(y)[0];if(!f)return null;const g=live(DB.grants).find(g=>g.status==='Accepted'&&g.outputPub===f.id);return g?shortMoney(g.amount,g.cur)+' → Publication':null};
  const rows=STAGES.map((st,i)=>({st,i,n:stageStudies(st).length}));
  const pubN=K.pubs.val(Y);const max=Math.max(1,...rows.map(x=>x.n));
- return h('section',{class:'card',style:{marginBottom:'16px'}},h('div',{class:'ch'},h('h2',{},'Research'),h('button',{class:'more',onclick:()=>go('research')},'Details →')),
+ return h('section',{class:'card',style:{marginBottom:'16px'}},h('div',{class:'ch'},h('h2',{},'Research & partnerships'),h('button',{class:'more',onclick:()=>go('research')},'Details →')),
   h('div',{class:'cgrid'},
-   h('div',{},metricBlock('pubs','Publications',Y),h('div',{class:'dvd'}),metricBlock('funding','External funding',Y,alt)),
+   h('div',{},metricBlock('pubs','Publications · Total',Y,null,{total:true,drill:allPubsDrill}),h('div',{class:'dvd'}),fundRow(Y,alt)),
    h('div',{},h('div',{class:'ht-h'},h('span',{},'From proposal to publication · Research pipeline')),
     h('div',{class:'hb',style:{marginTop:'10px'}},rows.map(x=>h('button',{class:'hrow','data-tip':`${x.st}: ${x.n} Studies (${Math.round(x.n/Math.max(1,pipeStudies().length)*100)}% of the pipeline)`,onclick:()=>pickStageDrill(x.st)},h('span',{class:'hl'},x.st),h('span',{class:'htrk'},h('i',{class:'ph'+x.i,style:{width:x.n/max*100+'%'}})),h('b',{},x.n),durOf(x.st)!=null?h('span',{class:'dmo'},'≈'+num(durOf(x.st))+' mo.'):null))),
     maturityBar(),
-    h('div',{class:'ms',style:{marginTop:'8px'}},`${pipeStudies().length} studies in the pipeline`))))}
+    h('div',{class:'ms',style:{marginTop:'8px'}},`${pipeStudies().length} studies in the pipeline`))),
+  h('div',{class:'dvd'}),partnersCard())}
 function ringChart(items,total,centerLabel,onPick){
  const NS='http://www.w3.org/2000/svg';const R=52,C=2*Math.PI*R;
  const mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
@@ -837,10 +841,10 @@ function partnersCard(){
  const L=live(DB.insts).filter(i=>i.status==='Partner').map(i=>({i,d:instData(i),pubs:live(DB.pubs).filter(p=>p.status==='Published'&&(p.partners||[]).includes(i.id)).length})).filter(x=>x.d.active.length>0||x.pubs>0);
  const dots=n=>h('span',{class:'dots','data-tip':'Studies in progress: '+n},Array.from({length:Math.min(n,6)},()=>h('i',{class:'sq c1'})),n>6?h('small',{},'+'+(n-6)):null);
  const ptag=n=>n?h('span',{class:'ptag','data-tip':'Published papers: '+n},n):h('span',{class:'ptag z'},'·');
- return h('section',{class:'card'},h('div',{class:'ch'},h('h2',{},'Partnerships'),h('b',{class:'tot'},L.length)),
+ return h('section',{class:'pin'},h('div',{class:'ch'},h('h2',{},'Partnerships'),h('b',{class:'tot'},L.length)),
   h('div',{class:'lg',style:{marginTop:0,marginBottom:4}},h('span',{},h('i',{class:'sq c1'}),'Studies in progress'),h('span',{},h('b',{class:'ptag'},'2'),'Published papers')),
-  INST_GROUPS.map(([t,types])=>{const items=L.filter(x=>types.includes(x.i.type||'')).sort((x,y)=>byInstOrder(x.i,y.i));if(!items.length)return null;
-   return h('div',{},h('div',{class:'gt'},t,h('small',{},items.length)),items.map(({i,d,pubs})=>h('button',{class:'prow',onclick:()=>go('inst/'+i.id)},h('span',{class:'pn'},i.name),h('span',{class:'pd'},dots(d.active.length),ptag(pubs)))))}))}
+  h('div',{class:'pgrid'},INST_GROUPS.map(([t,types])=>{const items=L.filter(x=>types.includes(x.i.type||'')).sort((x,y)=>byInstOrder(x.i,y.i));if(!items.length)return null;
+   return h('div',{},h('div',{class:'gt'},t,h('small',{},items.length)),items.map(({i,d,pubs})=>h('button',{class:'prow',onclick:()=>go('inst/'+i.id)},h('span',{class:'pn'},i.name),h('span',{class:'pd'},dots(d.active.length),ptag(pubs)))))})))}
 function reichmanDrill(){
  openModal({title:'Reichman opportunity 2027',sub:'Proposal / 2027 — not an existing activity. Currently: 0 medical students.',body:()=>h('div',{},
   h('p',{},'Reichman University has proposed making Sabar a clinical elective site for medical students in the clinical years.'),
