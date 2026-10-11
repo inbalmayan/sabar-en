@@ -773,7 +773,7 @@ function pageHome(){
  wrap.append(h('div',{class:'grid2'},trainingCard(Y),partnersCard()));
  return wrap}
 function metricBlock(key,label,Y,alt){
- const ys=[2025,2026];const vals=ys.map(y=>K[key].val(y));
+ const ys=key==='pubs'?[2024,2025,2026]:[2025,2026];const vals=ys.map(y=>K[key].val(y));
  const max=Math.max(1,...vals.map(v=>typeof v==='number'?v:0));
  const cur=K[key].val(Y);const a=alt&&alt(Y);
  return h('div',{class:'mb'},
