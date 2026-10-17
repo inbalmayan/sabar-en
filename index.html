@@ -393,6 +393,7 @@ html[dir=rtl] .roadrow .road svg{transform:scaleX(-1)}
 .logo.cheer .lg-roof{translate:0 -4px}
 
 
+.fp{padding:9px 0;border-bottom:1px solid var(--line)}.fph{display:flex;justify-content:space-between;align-items:baseline;gap:14px}.fph b{color:var(--navy)}.fpa{font-weight:800;color:var(--navy);white-space:nowrap}.fp .ms{margin-top:3px}.fpt{border-bottom:2px solid var(--line)}
 </style>
 </head>
 <body>
@@ -943,6 +944,7 @@ function pagePlan(){
  const w=h('div',{class:'plan'});
  const ul=L=>h('ul',{class:'pl'},L.map(x=>h('li',{},x)));
  const dt=(title,...c)=>h('details',{class:'dt'},h('summary',{},title),h('div',{class:'dtb'},...c));
+ const dto=(title,...c)=>{const d=dt(title,...c);d.open=true;return d};
  const tbl=(heads,rows,o={})=>h('div',{class:'tw'},h('table',{},h('thead',{},h('tr',{},heads.map(x=>h('th',{},x)))),h('tbody',{},rows.map((r,ri)=>h('tr',{style:{cursor:'default'},class:o.lastBold&&ri===rows.length-1?'foot':''},r.map((c,i)=>h('td',{style:i>0&&o.num?{whiteSpace:'nowrap'}:null},c)))))));
  const kpi=(label,val,tag,tagCls,sub)=>h('div',{class:'kcard'},h('div',{class:'ht-h'},h('span',{},label),badge(tag,tagCls)),h('div',{class:'kval'},val),sub?h('div',{class:'ms'},sub):null);
  const pill=t=>h('span',{class:'pill2'},t);
@@ -970,7 +972,13 @@ function pagePlan(){
     h('div',{class:'note'},'The amounts are planning estimates for 2027.')),
    h('div',{},
     dt('Role of the research and grants coordinator',ul(['Managing and tracking the progress of studies in the organization, from proposal to publication.','Coordination with researchers, partners and research institutions.','Assistance with ethics approval processes and document submission.','Identifying research grant opportunities.','Checking eligibility criteria and calls for proposals.','Compiling documents, budgets and timelines for grant submissions.','Supporting the submission process and follow-up.']),h('p',{class:'ms'},'The coordinator is not responsible for the scientific writing or for conducting the research in place of the researchers. The main barrier to research activity is also the researchers’ time, so the entire expected increase in publications should not be attributed to hiring the coordinator.')),
-    dt('The research fund',h('p',{},'The fund will be used for targeted funding of actions required to advance existing studies, such as:'),ul(['statistical analyses.','data processing.','professional expenses required to advance research and publication.']),h('p',{class:'ms'},'The fund will make it possible to advance studies that are currently delayed by the lack of limited, targeted funding.')),
+    dto('The research fund',h('p',{},'The fund will be used for targeted funding of actions required to advance existing studies, such as:'),ul(['statistical analyses.','data processing.','professional expenses required to advance research and publication.']),h('p',{class:'ms'},'The fund will make it possible to advance studies that are currently delayed by the lack of limited, targeted funding.'),
+     h('h3',{class:'sech2'},'Projects waiting for funding'),
+     h('div',{class:'fplist'},
+      h('div',{class:'fp'},h('div',{class:'fph'},h('b',{},'Head injury study — building the research cohort'),h('span',{class:'fpa'},'₪10,000')),h('div',{class:'ms'},'Time of a health professional or medical student who will build the cohort from the medical records')),
+      h('div',{class:'fp'},h('div',{class:'fph'},h('b',{},'Joint study with Clalit South'),h('span',{class:'fpa'},'₪18,500')),h('div',{class:'ms'},'Research budget')),
+      h('div',{class:'fp fpt'},h('div',{class:'fph'},h('b',{},'Total allocated'),h('span',{class:'fpa'},'₪28,500'))),
+      h('div',{class:'fp'},h('div',{class:'fph'},h('span',{},'Open for projects that arise'),h('span',{class:'fpa'},'₪21,500'))))),
     dt('Expected value of the investment',ul(['Stabilizing the flow of future studies, from proposal to publication.','Accelerating existing studies.','Reducing operational and funding barriers.','Building a systematic process for identifying and submitting research grants.','Reducing dependence on personal management of every stage of the research.','Strengthening the organizational research infrastructure over time.']))))));
  // ===== Axis 2: clinical training =====
  w.append(axis(2,'Clinical training',G2,
